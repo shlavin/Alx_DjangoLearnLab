@@ -68,8 +68,13 @@ def logout_view(request):
 # --------------------------------
 
 # Role-Based Views - USING @user_passes_test AS REQUIRED
-@user_passes_test(lambda u: u.is_authenticated and hasattr(u, 'userprofile') and u.userprofile.role == 'Admin')
+@user_passes_test(
+    lambda u: u.is_authenticated and hasattr(u, 'userprofile') and u.userprofile.role == 'Admin',
+    login_url='/login/'
+)
 def admin_view(request):
+    if not (hasattr(request.user, 'userprofile') and request.user.userprofile.role == 'Admin'):
+        return HttpResponseForbidden("You are not authorized to view this page.")
     return render(request, 'relationship_app/admin_view.html')
 
 
