@@ -4,6 +4,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from django.http import HttpResponseForbidden
+from django.contrib.auth.decorators import user_passes_test
 from .models import Book, Library
 
 # --------------------------------
@@ -59,23 +60,26 @@ def logout_view(request):
 # Role-Based Access Control (RBAC)
 # --------------------------------
 
-def admin(request):
-    if not request.user.is_authenticated or not hasattr(request.user, 'userprofile'):
-        return HttpResponseForbidden("You are not authorized to access this page.")
-    if request.user.userprofile.role != 'Admin':
-        return HttpResponseForbidden("You are not authorized to access this page.")
+# Admin check
+def is_admin(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
+
+@user_passes_test(is_admin)
+def admin_view(request):
     return render(request, 'relationship_app/admin_view.html')
 
+# Librarian check
+def is_librarian(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
+
+@user_passes_test(is_librarian)
 def librarian_view(request):
-    if not request.user.is_authenticated or not hasattr(request.user, 'userprofile'):
-        return HttpResponseForbidden("You are not authorized to access this page.")
-    if request.user.userprofile.role != 'Librarian':
-        return HttpResponseForbidden("You are not authorized to access this page.")
     return render(request, 'relationship_app/librarian_view.html')
 
+# Member check
+def is_member(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
+
+@user_passes_test(is_member)
 def member_view(request):
-    if not request.user.is_authenticated or not hasattr(request.user, 'userprofile'):
-        return HttpResponseForbidden("You are not authorized to access this page.")
-    if request.user.userprofile.role != 'Member':
-        return HttpResponseForbidden("You are not authorized to access this page.")
     return render(request, 'relationship_app/member_view.html')
