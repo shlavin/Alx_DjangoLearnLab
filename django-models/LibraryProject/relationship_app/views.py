@@ -15,6 +15,7 @@ def list_books(request):
     books = Book.objects.all()
     return render(request, 'relationship_app/list_books.html', {'books': books})
 
+
 class LibraryDetailView(DetailView):
     model = Library
     template_name = 'relationship_app/library_detail.html'
@@ -36,6 +37,7 @@ def register(request):
         form = UserCreationForm()
     return render(request, "relationship_app/register.html", {"form": form})
 
+
 def login_view(request):
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
@@ -47,9 +49,12 @@ def login_view(request):
                 login(request, user)
                 messages.success(request, f"Welcome, {username}!")
                 return redirect("list_books")
+            else:
+                messages.error(request, "Invalid username or password.")
     else:
         form = AuthenticationForm()
     return render(request, "relationship_app/login.html", {"form": form})
+
 
 def logout_view(request):
     logout(request)
@@ -60,25 +65,29 @@ def logout_view(request):
 # Role-Based Access Control (RBAC)
 # --------------------------------
 
-# Admin check
+# Helper functions for role checks
 def is_admin(user):
     return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Admin'
 
+
+def is_librarian(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
+
+
+def is_member(user):
+    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
+
+
+# Role-Based Views
 @user_passes_test(is_admin)
 def admin_view(request):
     return render(request, 'relationship_app/admin_view.html')
 
-# Librarian check
-def is_librarian(user):
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Librarian'
 
 @user_passes_test(is_librarian)
 def librarian_view(request):
     return render(request, 'relationship_app/librarian_view.html')
 
-# Member check
-def is_member(user):
-    return user.is_authenticated and hasattr(user, 'userprofile') and user.userprofile.role == 'Member'
 
 @user_passes_test(is_member)
 def member_view(request):
