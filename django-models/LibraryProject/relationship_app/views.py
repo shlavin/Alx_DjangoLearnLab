@@ -6,7 +6,8 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.contrib import messages
 from django.http import HttpResponseForbidden
-from .models import Book, Library, UserProfile
+from .models import Book, UserProfile
+from .models import Library
 
 
 # --------------------------------
