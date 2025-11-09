@@ -1,42 +1,42 @@
-# relationship_app/views.py
+
 
 from django.shortcuts import render, redirect
 from django.views.generic.detail import DetailView
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib import messages
 from .models import Book, Library
-from .forms import RegisterForm  # Make sure you have forms.py with RegisterForm
 
-# -----------------------------
+
 # Function-Based View — List all books
-# -----------------------------
+
 def list_books(request):
     books = Book.objects.all()
     return render(request, 'relationship_app/list_books.html', {'books': books})
 
-# -----------------------------
+
 # Class-Based View — Show library details
-# -----------------------------
+
 class LibraryDetailView(DetailView):
     model = Library
     template_name = 'relationship_app/library_detail.html'
     context_object_name = 'library'
 
-# -----------------------------
+
 # Authentication Views
-# -----------------------------
+
 
 # Registration view
 def register_view(request):
     if request.method == "POST":
-        form = RegisterForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Account created successfully. You can now login.")
-            return redirect("login")
+            user = form.save()
+            login(request, user)  
+            messages.success(request, "Account created and logged in successfully!")
+            return redirect("list_books")
     else:
-        form = RegisterForm()
+        form = UserCreationForm()
     return render(request, "relationship_app/register.html", {"form": form})
 
 # Login view
@@ -50,7 +50,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f"Welcome, {username}!")
-                return redirect("list_books")  # Redirect to a page after login
+                return redirect("list_books")
     else:
         form = AuthenticationForm()
     return render(request, "relationship_app/login.html", {"form": form})
