@@ -51,12 +51,13 @@ def list_books_in_library(library_name):
 def get_librarian_for_library(library_name):
     try:
         library = Library.objects.get(name=library_name)
-        librarian = library.librarian  
+        librarian = Librarian.objects.get(library=library)  
         print(f"The librarian for {library_name} is {librarian.name}.")
     except Library.DoesNotExist:
         print(f"No library found with the name '{library_name}'.")
     except Librarian.DoesNotExist:
         print(f"No librarian assigned to {library_name}.")
+
 
 
 # ------------------------------
