@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from accounts.models import CustomUser
+from bookshelf.models import CustomUser
 
 
 class Author(models.Model):
