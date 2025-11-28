@@ -107,6 +107,9 @@ SESSION_COOKIE_SECURE = True              # Ensures session cookie only sent ove
 # -----------------------------
 SECURE_SSL_REDIRECT = True                # Redirect all HTTP → HTTPS
 
+# Tell Django to trust the X-Forwarded-Proto header set by a proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # -----------------------------
 # NEW: HTTP Strict Transport Security (HSTS)
 # -----------------------------
