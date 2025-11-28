@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db import connection
 from .models import Book
-from .forms import BookForm, BookSearchForm, ExampleForm  # ensure this form exists
+from .forms import BookForm, BookSearchForm, 
+from .forms import ExampleForm  # ensure this form exists
 
 
 # -------------------------------
