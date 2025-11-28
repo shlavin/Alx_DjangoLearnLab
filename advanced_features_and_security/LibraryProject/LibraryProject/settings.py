@@ -4,10 +4,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-ws*l8ez%xqw46__u0tx7hv-$*n2&_x_m%%xa=2f5mw95ifz0w%'
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: keep DEBUG False in production
 DEBUG = False
 
 ALLOWED_HOSTS = []
@@ -95,7 +94,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # -----------------------------
-# Security Settings 
+# Security Settings
 # -----------------------------
 SECURE_BROWSER_XSS_FILTER = True          # Enables basic XSS protection in browsers
 X_FRAME_OPTIONS = 'DENY'                  # Prevents clickjacking by disabling iframe embedding
@@ -104,14 +103,20 @@ CSRF_COOKIE_SECURE = True                 # Ensures CSRF cookie only sent over H
 SESSION_COOKIE_SECURE = True              # Ensures session cookie only sent over HTTPS
 
 # -----------------------------
-# Content Security Policy 
-# Restricts sources for scripts, styles, images, etc.
-# Helps mitigate XSS by preventing loading untrusted content
+# NEW: HTTPS Enforcement
+# -----------------------------
+SECURE_SSL_REDIRECT = True                # Redirect all HTTP → HTTPS
+
+# -----------------------------
+# NEW: HTTP Strict Transport Security (HSTS)
+# -----------------------------
+SECURE_HSTS_SECONDS = 31536000            # Force HTTPS for 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True     # Apply HSTS to all subdomains
+SECURE_HSTS_PRELOAD = True                # Allow site to be preloaded in browsers
+
+# -----------------------------
+# Content Security Policy
 # -----------------------------
 CSP_DEFAULT_SRC = ("'self'",)
 CSP_SCRIPT_SRC = ("'self'", "https://trusted-cdn.com")
 CSP_STYLE_SRC = ("'self'", "https://fonts.googleapis.com")
-
-# Using Django ORM to avoid SQL injection by parameterizing queries
-# CSRF protection automatically applied through Django middleware and form templates
-# CSP enforced globally via django-csp to mitigate XSS attacks
