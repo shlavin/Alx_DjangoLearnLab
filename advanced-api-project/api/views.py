@@ -1,20 +1,41 @@
 from django.shortcuts import render
 
-from rest_framework import generics, permissions
+#added
+from django_filters import rest_framework as drf_filters
+from rest_framework import generics, permissions, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from .models import Book 
 from.serializers import BookSerializer
 
 '''
-Book List VIew
+Book List View with filtering , searching and ordering capabilities.
 its purpose is to retrieve all books that is get only
 its permissions are to allow read-only for everyone
+
 '''
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes =[IsAuthenticatedOrReadOnly]
+
+    #DRF built-in filters
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter
+    ]
+
+    #Filtering setup
+    filterset_fields = ['title', 'author', 'publication_year']
+
+    #searching setup
+    search_fields = ['title', 'author__name']
+
+    #ordering setup
+    ordering_fields = ['title', 'publication_year']
+    ordering = ['title'] #default ordering
 
 
 '''
