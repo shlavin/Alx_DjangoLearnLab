@@ -44,3 +44,23 @@ These features are enabled using:
 - DjangoFilterBackend
 - SearchFilter
 - OrderingFilter
+
+
+# Running API Tests
+
+The project includes full unit tests for Book API CRUD operations, filtering,
+searching, ordering, and authentication.
+
+Run the tests:
+
+    python manage.py test api
+
+Tests cover:
+- Creating books
+- Retrieving books
+- Updating books
+- Deleting books
+- Filtering by author & year
+- Searching titles/authors
+- Ordering results
+- Permission controls
