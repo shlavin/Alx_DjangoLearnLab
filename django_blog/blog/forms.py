@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import Post, Tag 
 from .models import Comment
+from taggit.forms import TagWidget
+
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -21,35 +23,15 @@ class UserUpdateForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-    # Add a tags field as a comma-separated string
-    tags = forms.CharField(
-        required=False,
-        label='Tags',
-        help_text='Add tags separated by commas',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Django, Python'})
-    )
-
     class Meta:
         model = Post
-        fields = ['title', 'content', 'tags']
+        fields = ['title', 'content', 'tags']  # add 'tags' here
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Post Title'}),
             'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Write your post here...', 'rows': 6}),
+            'tags': TagWidget(attrs={'class': 'form-control', 'placeholder': 'Add tags separated by commas'}),
         }
 
-    def save(self, commit=True):
-        instance = super().save(commit=False)
-        if commit:
-            instance.save()
-            # Handle tags
-            instance.tags.clear()  # Remove old tags
-            tag_list = self.cleaned_data.get('tags', '').split(',')
-            for tag_name in tag_list:
-                tag_name = tag_name.strip()
-                if tag_name:
-                    tag_obj, created = Tag.objects.get_or_create(name=tag_name)
-                    instance.tags.add(tag_obj)
-        return instance
 
         
 
