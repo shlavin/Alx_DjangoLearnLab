@@ -134,11 +134,10 @@ def PostSearchView(request):
     query = request.GET.get('q')  # Get the search term from the URL ?q=...
     posts = Post.objects.all()
     if query:
-        posts = posts.filter(
-            Q(title__icontains=query) | 
-            Q(content__icontains=query) | 
-            Q(tags__name__icontains=query)
-        ).distinct()
+        posts = Post.objects.filter(
+        Q(title__icontains=query) |
+        Q(content__icontains=query) |
+        Q(tags__name__icontains=query)
+    ).distinct()
     return render(request, 'blog/post_search.html', {'posts': posts, 'query': query})
-
     
