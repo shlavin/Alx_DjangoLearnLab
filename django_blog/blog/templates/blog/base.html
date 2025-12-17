@@ -10,9 +10,17 @@
 <body>
     <header>
         <nav>
-            <ul>
+            <ul style="display:flex; align-items:center; gap:1rem;">
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="{% url 'posts' %}">Blog Posts</a></li>
+
+                <!-- Search Form -->
+                <li>
+                    <form method="get" action="{% url 'search-posts' %}" class="d-flex">
+                        <input type="text" name="q" placeholder="Search posts..." class="form-control me-2" required>
+                        <button type="submit" class="btn btn-outline-success">Search</button>
+                    </form>
+                </li>
 
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'profile' %}">Profile</a></li>

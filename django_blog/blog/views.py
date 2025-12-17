@@ -7,8 +7,10 @@ from .forms import UserRegisterForm, UserUpdateForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from .models import Post, Comment
+from .models import Post, Comment, Tag
 from .forms import PostForm, CommentForm
+from django.db.models import Q
+
 
 def register(request):
     if request.method == 'POST':
@@ -114,3 +116,29 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return self.request.user == comment.author
 
     success_url = reverse_lazy('post-list')
+
+
+class TagPostListView(ListView):
+    model = Post
+    template_name = 'blog/tag_posts.html'
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        self.tag = get_object_or_404(Tag, name=self.kwargs['tag_name'])
+        return self.tag.posts.all()
+
+from django.db.models import Q
+
+# Search posts by title, content, or tags
+def PostSearchView(request):
+    query = request.GET.get('q')  # Get the search term from the URL ?q=...
+    posts = Post.objects.all()
+    if query:
+        posts = posts.filter(
+            Q(title__icontains=query) | 
+            Q(content__icontains=query) | 
+            Q(tags__name__icontains=query)
+        ).distinct()
+    return render(request, 'blog/post_search.html', {'posts': posts, 'query': query})
+
+    
