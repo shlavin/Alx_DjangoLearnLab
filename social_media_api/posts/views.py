@@ -1,11 +1,60 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
 from django_filters.rest_framework import DjangoFilterBackend
+from django.contrib.contenttypes.models import ContentType
 
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
 from .permissions import IsOwnerOrReadOnly
+from notifications.models import Notification
+
+
+class LikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+
+        like, created = Like.objects.get_or_create(
+            user=request.user,
+            post=post
+        )
+
+        if not created:
+            return Response(
+                {"detail": "You already liked this post."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if post.author != request.user:
+            Notification.objects.create(
+                recipient=post.author,
+                actor=request.user,
+                verb="liked your post",
+                target=post
+            )
+
+        return Response({"detail": "Post liked."})
+
+
+class UnlikePostView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        like = Like.objects.filter(
+            user=request.user,
+            post_id=pk
+        ).first()
+
+        if not like:
+            return Response(
+                {"detail": "You haven't liked this post."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        like.delete()
+        return Response({"detail": "Post unliked."})
 
 
 class FeedView(APIView):
@@ -13,7 +62,7 @@ class FeedView(APIView):
 
     def get(self, request):
         following_users = request.user.following.all()
-        # Make this a single line to match the checker's requirement
+       
         posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
 
         serializer = PostSerializer(posts, many=True)
