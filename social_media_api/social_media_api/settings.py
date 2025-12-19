@@ -10,22 +10,43 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+import dj_database_url  # NEW: For production database
+from dotenv import load_dotenv  # NEW: For environment variables
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+# ====================== ⚠️ YOU MUST CHANGE THESE ⚠️ ======================
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-&^q6$*x+&q-$=$50!u#bhpsmiby7ak0u58kfi$f#pd+cbsi^0x'
+
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY is not set in the .env file")
+
+
+
+# 🌐 ALLOWED_HOSTS: Add your Render/Heroku domain here after deployment
+# Format: 'your-app-name-abc123.onrender.com'
+ALLOWED_HOSTS = [
+    '127.0.0.1', 
+    'localhost',
+    '.onrender.com',  # Allows any Render subdomain
+    # ⬇️ ADD YOUR ACTUAL DEPLOYMENT DOMAIN HERE AFTER DEPLOYMENT ⬇️
+    # 'your-app-name-abc123.onrender.com',
+]
+# ========================================================================
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = False
 
 
 # Application definition
@@ -53,6 +74,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # NEW: Required for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,6 +113,15 @@ DATABASES = {
     }
 }
 
+# 🗄️ AUTO-SWITCH TO POSTGRESQL IN PRODUCTION (Render/Heroku)
+# This automatically uses PostgreSQL when DATABASE_URL is provided
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        # REMOVED: ssl_require=True  # ← Don't use this!
+    )
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -123,10 +154,18 @@ USE_I18N = True
 USE_TZ = True
 
 
+# ====================== 📁 STATIC & MEDIA FILES ======================
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # NEW: Where collectstatic puts files
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # NEW
+
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+# =====================================================================
 
 
 # Default primary key field type
@@ -147,6 +186,38 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-# Media files (user uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# ====================== 🔒 PRODUCTION SECURITY SETTINGS ======================
+# These only apply when DEBUG = False (in production)
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        'http://localhost:8000',
+        'http://127.0.0.1:8000',
+    ]
+# Development CSRF settings (when DEBUG = True)
+if not DEBUG:
+    # Add your production domain
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.onrender.com',
+        # ⬇️ ADD YOUR ACTUAL DEPLOYMENT URL HERE AFTER DEPLOYMENT ⬇️
+        # 'https://your-app-name-abc123.onrender.com',
+    ]
+    
+    # 🔐 HTTPS/SSL Settings
+    SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    
+    # 🍪 Secure Cookies
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    
+    # 🛡️ HSTS (HTTP Strict Transport Security)
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # 🚫 Security Headers
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+# =============================================================================

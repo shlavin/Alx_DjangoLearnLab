@@ -1,0 +1,23 @@
+# Core Django
+Django==5.2.7
+djangorestframework==3.16.1
+
+# Deployment
+gunicorn==23.0.0
+whitenoise==6.11.0
+
+# Database
+psycopg2-binary==2.9.11
+dj-database-url==3.0.1
+
+# Environment
+python-dotenv==1.2.1
+
+# Your specific packages
+django-filter==25.2
+django-taggit==6.1.0
+django-csp==4.0
+
+# Django dependencies
+asgiref==3.10.0
+sqlparse==0.5.3
