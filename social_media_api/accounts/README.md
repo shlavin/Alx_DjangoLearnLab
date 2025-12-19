@@ -16,3 +16,19 @@ cd social_media_api
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
+
+
+## Follow System
+
+### Follow a User
+POST `/api/accounts/follow/<user_id>/`
+
+### Unfollow a User
+POST `/api/accounts/unfollow/<user_id>/`
+
+## Feed
+
+### Get Feed
+GET `/api/feed/`
+
+Returns posts from users you follow, ordered by most recent.
