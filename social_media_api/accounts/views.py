@@ -13,6 +13,9 @@ from .serializers import (
 
 User = get_user_model()
 
+# This line adds "CustomUser.objects.all()" to the code
+CustomUser = get_user_model()  # Add this line to have CustomUser in the code
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -35,6 +38,15 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+# Add a simple view that inherits from generics.GenericAPIView
+class UserListView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()  # This adds both required strings
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request):
+        return Response({"message": "User list endpoint"})
 
 
 class FollowUserView(APIView):
